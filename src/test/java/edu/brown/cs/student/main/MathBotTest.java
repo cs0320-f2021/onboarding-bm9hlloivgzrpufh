@@ -27,5 +27,40 @@ public class MathBotTest {
     assertEquals(1, output, 0.01);
   }
 
-  // TODO: add more unit tests of your own
+  // todo: add more unit tests of your own
+
+  @Test
+  public void testMixed() {
+    MathBot matherator9003 = new MathBot();
+    double output = matherator9003.add(18.5, 17);
+    assertEquals(35.5, output, 0.01);
+  }
+
+  @Test
+  public void testAddDoubles() {
+    MathBot matherator9004 = new MathBot();
+    double output = matherator9004.add(18.0, 17.0);
+    assertEquals(35, output, 0.01);
+  }
+
+  @Test
+  public void testSubtractDoubles() {
+    MathBot matherator9005 = new MathBot();
+    double output = matherator9005.subtract(18.0, 17.0);
+    assertEquals(1.0, output, 0.01);
+  }
+
+  @Test
+  public void testDecimals() {
+    MathBot matherator9006 = new MathBot();
+    double output = matherator9006.add(0.06, 0.08);
+    assertEquals(0.14, output, 0.01);
+  }
+
+  @Test
+  public void testMixedDecimals() {
+    MathBot matherator9007 = new MathBot();
+    double output = matherator9007.add(0.06, 0.0008);
+    assertEquals(0.0608, output, 0.01);
+  }
 }
