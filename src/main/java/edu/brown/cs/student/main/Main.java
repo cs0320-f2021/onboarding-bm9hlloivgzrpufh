@@ -6,7 +6,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -63,13 +67,13 @@ public final class Main {
     // todo: Add your REPL here!
     try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
       String input;
+      HashMap<Integer, Star> starsList = new HashMap<Integer, Star>();
+      List<StarDistPair> distList = new LinkedList<StarDistPair>();
       while ((input = br.readLine()) != null) {
         try {
           input = input.trim();
           String[] arguments = input.split(" ");
-          System.out.println(arguments[0]);
-          // todo: complete your REPL by adding commands for addition "add" and subtraction
-          //  "subtract"
+
           if (arguments[0].equals("add")) {
             MathBot bot = new MathBot();
             System.out.println(bot.add(Double.parseDouble(arguments[1]),
@@ -78,6 +82,177 @@ public final class Main {
             MathBot bot = new MathBot();
             System.out.println(bot.subtract(Double.parseDouble(arguments[1]),
                 Double.parseDouble(arguments[2])));
+          } else if (arguments[0].equals("stars")) {
+            CSVParser parsingMachine = new CSVParser();
+            starsList = parsingMachine.parse(arguments[1]);
+          } else if (arguments[0].equals("naive_neighbors")) {
+            distList = new LinkedList<StarDistPair>();
+            if (arguments.length == 5) {
+              //int tempCount = 1;
+              for (Map.Entry<Integer, Star> entry : starsList.entrySet()) {
+                int tempID = entry.getKey();
+                Star tempStar = entry.getValue();
+                double dist = tempStar.distance(Double.parseDouble(arguments[2]),
+                    Double.parseDouble(arguments[3]), Double.parseDouble(arguments[4]));
+                StarDistPair tempPair = new StarDistPair(tempID, dist);
+                int listLength = distList.size();
+                int desiredLength = Integer.parseInt(arguments[1]);
+                for (int i = 0; i <= desiredLength; i++) {
+                  if (distList.isEmpty()) {
+                    distList.add(tempPair);
+                    break;
+                  } else if (listLength == 1) {
+                    if (dist < distList.get(i).getDist()) {
+                      distList.add(0, tempPair);
+                      break;
+                    } else if (dist > distList.get(i).getDist()) {
+                      distList.add(1, tempPair);
+                      break;
+                    } else {
+                      desiredLength = desiredLength + 1;
+                      Random rand = new Random();
+                      int randomNumber = rand.nextInt(2);
+                      distList.add(randomNumber, tempPair);
+                      break;
+                    }
+                  } else if (dist < distList.get(0).getDist()) {
+                    distList.add(0, tempPair);
+                    break;
+                  } else if (dist == distList.get(i).getDist()) {
+                    desiredLength = desiredLength + 1;
+                    int count = 1;
+                    for (int n = 1; i + n != listLength; n++) {
+                      if (dist == distList.get(i + n).getDist()) {
+                        count = count + 1;
+                      } else {
+                        break;
+                      }
+                    }
+                    Random rand = new Random();
+                    int randomNumber = rand.nextInt(count + 1);
+                    distList.add(i + randomNumber, tempPair);
+                    break;
+                  } else if (i == listLength - 1) {
+                    distList.add(i + 1, tempPair);
+                    break;
+                  } else if (dist < distList.get(i + 1).getDist()
+                      && dist > distList.get(i).getDist()) {
+                    distList.add(i + 1, tempPair);
+                    break;
+                  }
+                }
+                if (distList.size() > desiredLength) {
+                  distList.remove(desiredLength);
+                }
+              }
+              int neighbors = Integer.parseInt(arguments[1]);
+              if (neighbors > starsList.size()) {
+                for (int i = 0; i < starsList.size(); i++) {
+                  StarDistPair pair = distList.get(i);
+                  int starID = pair.getID();
+                  Star star = starsList.get(starID);
+                  System.out.println(star.getName());
+                  System.out.println(star.getID());
+                }
+              } else {
+                for (int i = 0; i < neighbors; i++) {
+                  StarDistPair pair = distList.get(i);
+                  int starID = pair.getID();
+                  Star star = starsList.get(starID);
+                  System.out.println(star.getName());
+                  System.out.println(star.getID());
+                }
+              }
+            } else if (arguments.length == 3) {
+              String targetName = arguments[2].replace("\"", "");
+              int targetID = -1;
+              for (Map.Entry<Integer, Star> entry : starsList.entrySet()) {
+                int tempID = entry.getKey();
+                Star tempStar = entry.getValue();
+                if (tempStar.getName().equals(targetName)) {
+                  targetID = tempID;
+                  break;
+                }
+              }
+              Star targetStar = starsList.get(targetID);
+              starsList.remove(targetID);
+              for (Map.Entry<Integer, Star> entry : starsList.entrySet()) {
+                int tempID = entry.getKey();
+                Star tempStar = entry.getValue();
+                double dist = tempStar.distance(targetStar.getX(), targetStar.getY(),
+                    targetStar.getZ());
+                StarDistPair tempPair = new StarDistPair(tempID, dist);
+                int listLength = distList.size();
+                int desiredLength = Integer.parseInt(arguments[1]);
+                for (int i = 0; i <= desiredLength; i++) {
+                  if (distList.isEmpty()) {
+                    distList.add(tempPair);
+                    break;
+                  } else if (listLength == 1) {
+                    if (dist < distList.get(i).getDist()) {
+                      distList.add(0, tempPair);
+                      break;
+                    } else if (dist > distList.get(i).getDist()) {
+                      distList.add(1, tempPair);
+                      break;
+                    } else {
+                      desiredLength = desiredLength + 1;
+                      Random rand = new Random();
+                      int randomNumber = rand.nextInt(2);
+                      distList.add(randomNumber, tempPair);
+                      break;
+                    }
+                  } else if (dist < distList.get(0).getDist()) {
+                    distList.add(0, tempPair);
+                    break;
+                  } else if (dist == distList.get(i).getDist()) {
+                    desiredLength = desiredLength + 1;
+                    int count = 1;
+                    for (int n = 1; i + n != listLength; n++) {
+                      if (dist == distList.get(i + n).getDist()) {
+                        count = count + 1;
+                      } else {
+                        break;
+                      }
+                    }
+                    Random rand = new Random();
+                    int randomNumber = rand.nextInt(count + 1);
+                    distList.add(i + randomNumber, tempPair);
+                    break;
+                  } else if (i == listLength - 1) {
+                    distList.add(i + 1, tempPair);
+                    break;
+                  } else if (dist < distList.get(i + 1).getDist()
+                      && dist > distList.get(i).getDist()) {
+                    distList.add(i + 1, tempPair);
+                    break;
+                  }
+                }
+                if (distList.size() > desiredLength) {
+                  distList.remove(desiredLength);
+                }
+              }
+              int neighbors = Integer.parseInt(arguments[1]);
+              if (neighbors > starsList.size()) {
+                for (int i = 0; i < starsList.size(); i++) {
+                  StarDistPair pair = distList.get(i);
+                  int starID = pair.getID();
+                  Star star = starsList.get(starID);
+                  System.out.println(star.getName());
+                  System.out.println(star.getID());
+                }
+              } else {
+                for (int i = 0; i < neighbors; i++) {
+                  StarDistPair pair = distList.get(i);
+                  int starID = pair.getID();
+                  Star star = starsList.get(starID);
+                  System.out.println(star.getName());
+                  System.out.println(star.getID());
+                }
+              }
+            } else {
+              throw new Exception();
+            }
           } else {
             throw new Exception();
           }

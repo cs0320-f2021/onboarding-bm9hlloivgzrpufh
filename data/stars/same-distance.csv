@@ -1,0 +1,7 @@
+StarID,ProperName,X,Y,Z
+1,Star One,1,0,0
+2,Star Two,0,1,0
+3,Star Three,0,0,1
+4,Star Four,-1,0,0
+5,Star Five,0,-1,0
+6,Star Six,0,0,-1
